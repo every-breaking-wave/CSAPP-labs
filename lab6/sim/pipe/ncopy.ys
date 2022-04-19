@@ -1,0 +1,131 @@
+#/* $begin ncopy-ys */
+##################################################################
+# ncopy.ys - Copy a src block of len words to dst.
+# Return the number of positive words (>0) contained in src.
+#
+# Include your name and ID here.
+# name: Feng Yifei ID:520030910021
+# Describe how and why you modified the baseline code.
+#	1.change irmovq + rrmovq to iaddq to reduce cycles
+#	2.unroll Loop,considered CPE, I choose 6 times in each Loop
+#	3.to avoid Load/use hazard, insert another instruction between these two instructions to avoid the waste caused by bubbles
+##################################################################
+# Do not modify this portion
+# Function prologue.
+# %rdi = src, %rsi = dst, %rdx = len
+ncopy:
+
+##################################################################
+# You can modify this portion
+	# Loop header
+	jmp Test
+		
+Loop:	mrmovq (%rdi), %r10	# read val from src...
+	mrmovq 8(%rdi), %r9
+	andq %r10, %r10		# val1 <= 0?
+	rmmovq %r10, (%rsi)	# ...and store it to dst
+	rmmovq %r9, 8(%rsi)
+	jle Npos			# if so ,goto Nops
+	iaddq $1,%rax		# val1 > 0
+	
+Npos:	andq %r9, %r9		# val2 <= 0?
+	jle  Loop1			# if so, goto Nops
+	iaddq $1, %rax		# val2 > 0
+
+Loop1:	mrmovq 16(%rdi), %r10	# read val from src...
+	mrmovq 24(%rdi), %r9
+	andq %r10, %r10		# val1 <= 0?
+	rmmovq %r10, 16(%rsi)	# ...and store it to dst
+	rmmovq %r9, 24(%rsi)
+	jle Npos1			# if so ,goto Nops
+	iaddq $1,%rax		# val1 > 0
+	
+Npos1:	andq %r9, %r9		# val2 <= 0?
+	jle  Loop2			# if so, goto Nops
+	iaddq $1, %rax		# val2 > 0
+
+Loop2:	mrmovq 32(%rdi), %r10	# read val from src...
+	mrmovq 40(%rdi), %r9
+	andq %r10, %r10		# val1 <= 0?
+	rmmovq %r10, 32(%rsi)	# ...and store it to dst
+	rmmovq %r9, 40(%rsi)
+	jle Npos2			# if so ,goto Nops
+	iaddq $1,%rax		# val1 > 0
+
+Npos2:	
+	iaddq $48, %rdi		# rdi += 6
+	iaddq $48, %rsi		# rsi += 6
+	andq %r9, %r9		# val2 <= 0?
+	jle  Test			
+	iaddq $1, %rax		# val2 > 0
+
+
+Test:
+	
+	iaddq $-6, %rdx	
+	jge Loop		# if len >= 6, goto Loop:
+
+Test1:
+	iaddq $3, %rdx	
+	jge Test2	# len =3,  4，5
+	iaddq $1, %rdx 
+	je r2		# len = 2
+	iaddq $1, %rdx	
+	je r1 		# len = 1
+	jmp Done		# len = 0
+Test2:
+	je r3		# len = 3
+	iaddq $-1, %rdx
+	je r4		# len = 4
+			# len = 5  直接落下
+		
+r5:	
+	mrmovq 32(%rdi), %r13	# read val from src...
+	andq %r13, %r13
+	rmmovq %r13, 32(%rsi)	# ...and store it to dst
+
+r4:	
+	mrmovq 24(%rdi), %r12	# read val from src...
+	jle r41
+	iaddq $1 ,%rax
+
+r41:
+	andq %r12, %r12
+	rmmovq %r12, 24(%rsi)	# ...and store it to dst
+
+r3:	
+	mrmovq 16(%rdi), %r11	# read val from src...
+	jle r31
+	iaddq $1 ,%rax
+r31:
+	andq %r11, %r11
+	rmmovq %r11, 16(%rsi)	# ...and store it to dst
+
+r2:	
+	mrmovq 8(%rdi), %r10	# read val from src...
+	jle r21
+	iaddq $1 ,%rax
+r21:
+	andq %r10, %r10
+	rmmovq %r10, 8(%rsi)	# ...and store it to dst
+
+r1:	
+	mrmovq (%rdi), %r9	# read val from src...
+	jle r11
+	iaddq $1, %rax
+r11:
+	andq %r9, %r9
+	rmmovq %r9, (%rsi)	# ...and store it to dst
+	jle Done
+	iaddq $1, %rax		# count++
+
+
+##################################################################
+# Do not modify the following section of code
+# Function epilogue.
+Done:
+	ret
+##################################################################
+# Keep the following label at the end of your function
+End:
+#/* $end ncopy-ys */

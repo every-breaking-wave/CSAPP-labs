@@ -1,0 +1,47 @@
+# Student ID:520030910021
+# Name:  Feng Yifei
+
+#/* $begin code-yso */
+#/* $begin code-ysa */
+# Execution begins at address 0 
+	.pos 0 
+init:	irmovq Stack, %rsp  	# Set up stack pointer  
+	call Main		# Execute main program
+	halt			# Terminate program 
+
+# Array 
+.align 8
+ele1:
+	.quad 0x00a
+	.quad ele2
+ele2:
+	.quad 0x0b0
+	.quad ele3
+ele3:
+	.quad 0xc00
+	.quad 0
+
+Main:	irmovq ele1,%rdi
+	call Sum		
+	ret 
+
+#/* $begin sum-ys 0 */
+	# int Sum(int *Start)
+Sum:	
+	xorq %rax,%rax		# val = 0
+		
+Loop:	andq   %rdi, %rdi	#   Set condition codes
+	je     End
+	mrmovq (%rdi), %rsi
+	addq %rsi,%rax          # add to sum
+	mrmovq 0x8(%rdi) , %rdi  # array = array->next
+	jmp    Loop             
+
+End:	ret
+#/* $end sum-ys 0 */
+
+# The stack starts here and grows to lower addresses
+	.pos 0x200		
+Stack:	 
+#/* $end code-ysa */
+#/* $end code-yso */

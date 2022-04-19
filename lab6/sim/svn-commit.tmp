@@ -1,0 +1,8 @@
+
+--This line, and those below, will be ignored--
+
+A    misc/sum.ys
+A    misc/rsum.ys
+A    misc/copy.ys
+M    seq/seq-full.hcl
+M    pipe/pipe-full.hcl
